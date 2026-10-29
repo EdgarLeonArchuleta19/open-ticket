@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" fill="none">
+  <!-- Fondo Verde Esmeralda Redondeado Idéntico al TopNavbar -->
+  <rect width="64" height="64" rx="16" fill="#047857"/>
+  <!-- Icono Ticket OpenTicket -->
+  <g transform="translate(10, 10) scale(1.8333)" stroke="#ffffff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" fill="none">
+    <path d="M2 9a3 3 0 0 1 0 6v2a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-2a3 3 0 0 1 0-6V7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2Z"/>
+    <path d="M13 5v2"/>
+    <path d="M13 17v2"/>
+    <path d="M13 11v2"/>
+  </g>
+</svg>

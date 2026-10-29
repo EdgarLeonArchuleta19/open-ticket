@@ -1,220 +1,213 @@
-# Sistema Gestor de Reportes - Telmex
+<div align="center">
 
-Aplicación web para la gestión de tickets de soporte técnico. Permite a los usuarios
-reportar incidencias, asigna automáticamente cada ticket al técnico con menos carga
-laboral de su departamento y ofrece a los administradores un panel para supervisar
-tickets, personal y problemas recurrentes.
+# 🎫 OpenTicket
 
-## Características
+### Sistema Empresarial de Gestión de Incidencias, Tickets & Mesa de Ayuda (Helpdesk)
 
-- **Autenticación por roles** con JWT: `administrador`, `tecnico` y `usuarioNormal`.
-- **Contraseñas con hash** `bcrypt` (10 rondas de sal).
-- **Creación de tickets** con selección de departamento y tema.
-- **Asignación automática** del técnico con menos tickets activos del departamento.
-- **Historial de seguimiento** por ticket (creación, cambios de estado, respuestas, cierres).
-- **Panel administrativo**: consulta de todos los tickets, filtros y detalle.
-- **Gestión de personal**: alta, edición y baja de técnicos y usuarios.
-- **Gestión de problemas recurrentes**: agrupa varios tickets bajo un mismo problema y los resuelve en bloque.
-- **Confirmación del cliente**: cierre o reapertura del ticket según conformidad.
-- **Seguridad**: `helmet`, CORS configurable, rate-limit en el login y envío de `JWT_SECRET` vía entorno.
+[![Vue.js](https://img.shields.io/badge/Vue.js-3.x-4FC08D?style=for-the-badge&logo=vuedotjs&logoColor=white)](https://vuejs.org/)
+[![Node.js](https://img.shields.io/badge/Node.js-18+-339933?style=for-the-badge&logo=nodedotjs&logoColor=white)](https://nodejs.org/)
+[![Express](https://img.shields.io/badge/Express-4.x-000000?style=for-the-badge&logo=express&logoColor=white)](https://expressjs.com/)
+[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-14+-4169E1?style=for-the-badge&logo=postgresql&logoColor=white)](https://www.postgresql.org/)
+[![Tailwind CSS](https://img.shields.io/badge/Tailwind-CSS-06B6D4?style=for-the-badge&logo=tailwindcss&logoColor=white)](https://tailwindcss.com/)
+[![License: Non-Commercial](https://img.shields.io/badge/License-Non--Commercial-emerald?style=for-the-badge)](./LICENSE)
 
-## Stack tecnológico
+<br/>
 
-| Capa        | Tecnología                                                       |
-| ----------- | ---------------------------------------------------------------- |
-| Frontend    | Vue 3, Vue Router 4, Bootstrap 5, Axios                          |
-| Backend     | Node.js, Express, `pg` (PostgreSQL), JWT, bcrypt, helmet, morgan |
-| Base datos  | PostgreSQL                                                       |
+**OpenTicket** es una plataforma web completa de grado empresarial diseñada para la administración, canalización, seguimiento y resolución de tickets técnicos, incidencias operativas y soporte interdepartamental.
 
-## Estructura del proyecto
+Desarrollada con una arquitectura limpia, **estética SaaS sobria (blanco dominante / modo oscuro profundo con acentos en verde esmeralda institucional `#047857`)**, control estricto de concurrencia y roles de usuario basados en RBAC.
+
+[Características](#-características-principales) •
+[Arquitectura](#-arquitectura-y-seguridad) •
+[Puesta en Marcha](#-instalación-y-puesta-en-marcha) •
+[Catálogos y Estados](#-catálogos-y-ciclo-de-vida) •
+[Licencia](#-licencia)
+
+</div>
+
+---
+
+## 🌟 Características Principales
+
+### 🎨 Experiencia de Usuario & Diseño SaaS
+* **Soporte Nativo de Modo Claro / Oscuro:** Interfaz predominantemente blanca por defecto con alternancia fluida a modo oscuro (zinc-900 / negro puro) persistente en `localStorage`.
+* **Acentos en Verde Corporativo Sobrio:** Paleta de colores cuidada con tonalidades verdes profesionales (`#047857` / `#059669`), evitando estridencias o degradados innecesarios.
+* **Navegación Superior Elevada:** Barra de control con pestañas activas destacadas, alertas de notificaciones en vivo y accesos directos por rol.
+* **Componentes de Retroalimentación Global:** Notificaciones flotantes tipo *Toast* y modales de confirmación interactivos para cada acción sensible (cierre de tickets, desactivación de cuentas y eliminación de registros).
+* **Paginación Inteligente con Soporte Dark Mode:** Barra de paginación reactiva con selector de elementos (5, 10, 25, 50 registros) y adaptabilidad completa para pantallas móviles y escritorios.
+
+---
+
+### 🛡️ Concurrencia y Seguridad Robusta
+* **Generación Atómica de Folios:** Cada ticket recibe un folio único e incremental (`TKT-000001`, `TKT-000002`...) alimentado por secuencias atómicas en PostgreSQL, garantizando cero colisiones ante cargas masivas.
+* **Control de Concurrencia Optimista (Detección de *Lost Updates*):** Si dos especialistas visualizan el mismo ticket y uno aplica un cambio, el sistema detecta el desfase de versión mediante `expected_updated_at` y responde con `HTTP 409 Conflict`, protegiendo la información y recargando la pantalla automáticamente.
+* **Bloqueo Pesimista por Fila (`SELECT ... FOR UPDATE`):** Transacciones ACID serializadas para cambios de estado, asignación, notas y cierre de tickets.
+* **Revocación de Sesión en Tiempo Real:** El middleware de autenticación valida activamente el estado del usuario (`is_active`). Si un administrador desactiva a un empleado, su token JWT queda revocado de inmediato en la siguiente petición.
+* **Protección contra Fuerza Bruta y Abuso de API:** Doble capa de limitación con `express-rate-limit` (30 intentos en login y 600 solicitudes por ventana de 15 min en toda la API).
+* **Notas Internas Confidenciales:** Los agentes y administradores pueden dejar notas privadas que quedan excluidas a nivel de base de datos para solicitantes.
+
+---
+
+### 📊 Dashboard Analítico y Métricas en Tiempo Real
+* **Indicadores Clave:** Total de tickets, pendientes, resueltos hoy y tiempo de resolución promedio calculados directamente desde PostgreSQL.
+* **Gráficas Vectoriales Integradas (Sin dependencias pesadas):**
+  * **Gráfica de Dona:** Distribución porcentual por estado operativo.
+  * **Gráfica de Área / Línea de 7 Días:** Tendencia de tickets creados vs resueltos día por día mediante series temporales (`generate_series`).
+  * **Gráfica de Barras:** Carga de trabajo distribuida por departamento destino.
+* **Línea de Tiempo Reciente:** Registro cronológico de actividades y eventos relevantes.
+
+---
+
+## 🏗️ Arquitectura y Tecnologías
 
 ```
-telmex-tickets/
-├── backend/                 # API REST en Express
-│   ├── server.js            # Punto de entrada
-│   ├── src/
-│   │   ├── app.js           # Configuración de middleware y rutas
-│   │   ├── config/db.js     # Pool de PostgreSQL
-│   │   ├── controllers/     # Lógica de negocio por recurso
-│   │   ├── middleware/      # auth (JWT + roles), errorHandler
-│   │   ├── routes/          # Definición de rutas REST
-│   │   └── utils/           # asyncHandler, AppError
-│   ├── scripts/seed-users.js# Usuarios de prueba con hash bcrypt
-│   ├── package.json
-│   └── .env.example         # Variables de entorno de ejemplo
-├── frontend/                # SPA con Vue 3
-│   ├── public/
-│   └── src/
-│       ├── components/      # Navbar
-│       ├── router/          # Rutas con guardas por rol
-│       ├── services/        # api.js (axios) y auth.js (sesión)
-│       └── views/           # Pantallas de la aplicación
-├── database/
-│   └── schema.sql           # Esquema + función + datos base (departamentos/temas)
-└── README.md
+┌────────────────────────────────────────────────────────┐
+│              OpenTicket Single-Port Host               │
+│                    (Puerto 3000)                       │
+├────────────────────────────┬───────────────────────────┤
+│    Frontend SPA (Vue 3)    │      API REST Express     │
+│   • Tailwind CSS (CDN)     │   • Controladores y Rutas │
+│   • Vue Router & Reactive  │   • Middlewares JWT & RBAC│
+│   • Toast & Confirm Stack  │   • Rate Limit & Helmet   │
+├────────────────────────────┴───────────────────────────┤
+│            PostgreSQL Relational Database              │
+│    • Transacciones ACID con Bloqueo de Fila            │
+│    • Secuencia Nativa ticket_folio_seq                │
+│    • Integridad Referencial y Auditoría               │
+└────────────────────────────────────────────────────────┘
 ```
 
-## Requisitos
+| Capa | Tecnologías | Descripción |
+| :--- | :--- | :--- |
+| **Frontend** | Vue 3, Vue Router 4, Tailwind CSS, SVG Icons | Interfaz responsiva, temas claro/oscuro y componentes modulares. |
+| **Backend** | Node.js, Express, `pg` (node-postgres), JWT, bcryptjs | API RESTful con validaciones estrictas y arquitectura desacoplada. |
+| **Base de Datos** | PostgreSQL 14+ | Esquema relacional normalizado con índices de alto rendimiento. |
+| **Seguridad** | Helmet, CORS Whitelist, Express-Rate-Limit, JWT | Protección contra ataques web comunes y revocación inmediata. |
 
-- Node.js 16 o superior
-- PostgreSQL 12 o superior
-- npm
+---
 
-## Puesta en marcha
+## 🚀 Instalación y Puesta en Marcha
 
-### 1. Base de datos
+### Prerrequisitos
+* **Node.js** v18 o superior.
+* **PostgreSQL** v14 o superior instalado y corriendo en el puerto 5432.
+* **npm** o **yarn**.
 
-Crea la base de datos y carga el esquema (tablas, función y datos de
-departamentos/temas):
+---
+
+### 1. Configuración de la Base de Datos
+
+En tu cliente de PostgreSQL (`psql` o pgAdmin), crea la base de datos:
+
+```sql
+CREATE DATABASE open_ticket;
+```
+
+Aplica el esquema relacional con datos estructurados:
 
 ```bash
-psql -U postgres -c "CREATE DATABASE telmex;"
-psql -U postgres -d telmex -f database/schema.sql
+psql -U postgres -d open_ticket -f database/schema.sql
 ```
 
-### 2. Backend
+---
+
+### 2. Configurar Variables de Entorno
+
+En la carpeta `backend`, copia el archivo de ejemplo o edita `.env`:
+
+```env
+PORT=3000
+NODE_ENV=development
+
+DB_USER=postgres
+DB_HOST=localhost
+DB_NAME=open_ticket
+DB_PASSWORD=tu_password_aqui
+DB_PORT=5432
+
+JWT_SECRET=tu_clave_secreta_jwt_muy_segura_2026
+JWT_EXPIRES=8h
+
+CORS_ORIGIN=http://localhost:8080,http://127.0.0.1:8080,http://localhost:3000,http://127.0.0.1:3000
+```
+
+---
+
+### 3. Instalar Dependencias y Sembrar Datos
 
 ```bash
+# 1. Dependencias del backend
 cd backend
 npm install
-copy .env.example .env      # Windows
-# cp .env.example .env      # Linux / macOS
-npm run seed                # crea los usuarios de prueba (con hash)
+
+# 2. Poblar datos iniciales (usuarios, departamentos, causas y tickets demo)
+npm run seed
+
+# 3. Compilar el frontend para producción
+cd ../frontend
+npm install
+npm run build
+```
+
+---
+
+### 4. Iniciar el Servidor Unificado
+
+```bash
+cd ../backend
 npm start
 ```
 
-El servidor queda escuchando en `http://localhost:3000`.
+Abre tu navegador en:
+👉 **[http://localhost:3000](http://localhost:3000)**
 
-Variables de entorno soportadas (`backend/.env`):
+---
 
-| Variable      | Descripción                     | Por defecto         |
-| ------------- | ------------------------------- | ------------------- |
-| `PORT`        | Puerto del servidor API         | `3000`              |
-| `NODE_ENV`    | Entorno                         | `development`       |
-| `DB_USER`     | Usuario de PostgreSQL           | `postgres`          |
-| `DB_HOST`     | Host de PostgreSQL              | `localhost`         |
-| `DB_NAME`     | Nombre de la base de datos      | `telmex`            |
-| `DB_PASSWORD` | Contraseña                      | `1234`              |
-| `DB_PORT`     | Puerto de PostgreSQL            | `5432`              |
-| `JWT_SECRET`  | Secreto para firmar los tokens  | *(sin valor)*       |
-| `JWT_EXPIRES` | Expiración del token            | `8h`                |
-| `CORS_ORIGIN` | Orígenes permitidos (separados por coma) | `http://localhost:8080,http://127.0.0.1:8080` |
+## 👥 Cuentas de Acceso Preconfiguradas
 
-> `JWT_SECRET` no tiene valor por defecto: si no se define, el servidor usa una
-> advertencia y un secreto aleatorio por proceso (los tokens no sobreviven a un
-> reinicio). En producción define siempre `JWT_SECRET`.
+Tras ejecutar `npm run seed`, las siguientes cuentas están listas para iniciar sesión:
 
-### 3. Frontend
+| Usuario | Contraseña | Rol | Alcance en el Sistema |
+| :--- | :--- | :--- | :--- |
+| **`admin`** | `admin123` | **Administrador** | Acceso global total, KPIs, gestión de usuarios, catálogos y reasignaciones. |
+| **`agente.ti`** | `agente123` | **Agente** | Mesa de soporte técnico de Sistemas/TI. Diagnóstico y notas internas. |
+| **`agente.redes`** | `agente123` | **Agente** | Especialista de infraestructura de telecomunicaciones y switches. |
+| **`solicitante1`** | `solicita123` | **Solicitante** | Portal de usuario para crear tickets y dar seguimiento a sus incidencias. |
 
-```bash
-cd frontend
-npm install
-copy .env.example .env      # opcional: URL de la API en VUE_APP_API_URL
-npm run serve
+---
+
+## 🔄 Catálogos y Ciclo de Vida del Ticket
+
+```
+[Nuevo Requerimiento]
+         │
+         ▼
+     [ Nuevo ] ──────► [ Abierto ] ──────► [ En Proceso ]
+                             ▲                    │
+                             │                    ▼
+                             └──────────── [ En Espera ]
+                                                  │
+                                                  ▼
+[ Ticket Cerrado ] ◄─── Confirmación ─── [ Resuelto ]
+         │
+         └───► [ Reabierto ] (si la solución no fue satisfactoria)
 ```
 
-La aplicación queda disponible en `http://localhost:8080`.
+1. **Departamentos:** Áreas operativas con código único y responsable asignado.
+2. **Categorías y Causas:** Clasificación en 2 niveles donde cada causa define la **prioridad predeterminada** que el sistema asigna de forma automática al ticket.
+3. **Control de Estados:** Transiciones guiadas que impiden dobles resoluciones o cierres accidentales.
 
-> El frontend consume la API en `http://localhost:3000` por defecto. Para cambiarlo,
-> define `VUE_APP_API_URL` en `frontend/.env` y reconstruye.
+---
 
-## Credenciales de prueba
+## 📄 Licencia
 
-| Rol            | Usuario                | Contraseña        |
-| -------------- | ---------------------- | ----------------- |
-| Administrador  | `admin`                | `admin123`        |
-| Técnico        | `tecnico_cambios`      | `cambio123`       |
-| Técnico        | `tecnico_problemas`    | `problemas123`    |
-| Usuario normal | `usuario1`             | `usuario123`      |
-| Usuario normal | `usuario2`             | `usuario456`      |
-| Usuario normal | `usuario3`             | `usuario789`      |
+Este proyecto está protegido bajo una **Licencia de Uso No Comercial**.
 
-Los técnicos de cada departamento siguen el patrón `tecnico_<area>` con contraseña
-`<area>123` (ej. `tecnico_redes` / `redes123`). Al ejecutar `npm run seed`, las
-contraseñas se guardan con `bcrypt` y el script es idempotente (no duplica usuarios).
+Consulta el archivo [LICENSE](./LICENSE) para conocer los términos completos. Se permite el uso, estudio, modificación y ejecución del software exclusivamente para **fines personales, educativos, académicos y de evaluación sin fines de lucro**. Queda estrictamente prohibida su comercialización, reventa o explotación en servicios lucrativos sin autorización por escrito del autor.
 
-## Roles y flujo
+---
 
-1. **Usuario normal**: crea tickets y hace seguimiento desde "Crear Ticket".
-   Cuando un técnico marca el ticket como `resuelto`, el usuario confirma (cierra) o reabre.
-2. **Técnico**: atiende sus tickets asignados, actualiza estado/prioridad y responde.
-   El técnico del departamento *Problemas* gestiona los problemas recurrentes.
-3. **Administrador**: supervisa todos los tickets, gestiona el personal y las configuraciones.
-
-La sesión se guarda en `localStorage` (`token` y `usuario`). El interceptor de
-axios añade `Authorization: Bearer <token>` a cada petición y, ante un `401`,
-limpia la sesión y redirige al login.
-
-Estados de un ticket: `abierto` → `en proceso` → `resuelto` → `cerrado`.
-
-## Endpoints de la API
-
-Todas las rutas bajo `/api` requieren `Authorization: Bearer <token>` salvo el login.
-
-### Autenticación
-
-| Método | Ruta              | Rol      | Descripción                    |
-| ------ | ----------------- | -------- | ------------------------------ |
-| POST   | `/api/auth/login` | Público  | Inicio de sesión → `{token, usuario}` |
-| GET    | `/api/auth/me`    | Cualquier autenticado | Datos del usuario actual |
-
-### Catálogos
-
-| Método | Ruta                            | Rol         | Descripción                          |
-| ------ | ------------------------------- | ----------- | ------------------------------------ |
-| GET    | `/api/departamentos`            | Cualquiera  | Departamentos (excluye "Problemas")  |
-| GET    | `/api/departamentos/:id/temas`  | Cualquiera  | Temas de un departamento             |
-| GET    | `/api/admin/departamentos`      | Administrador | Todos los departamentos            |
-
-### Tickets
-
-| Método | Ruta                          | Rol          | Descripción                              |
-| ------ | ----------------------------- | ------------ | ---------------------------------------- |
-| POST   | `/api/tickets`                | usuarioNormal | Crear ticket; el técnico se asigna solo |
-| GET    | `/api/tickets/mios`           | usuarioNormal | Tickets creados por el usuario           |
-| GET    | `/api/tickets/asignados`      | tecnico      | Tickets asignados al técnico del token   |
-| GET    | `/api/tickets/:id`            | Dueño/técnico/admin | Detalle `{ticket, historial, tecnico}` |
-| GET    | `/api/tickets/:id/historial`  | Dueño/técnico/admin | Historial del ticket                 |
-| PUT    | `/api/tickets/:id`            | técnico/admin | Actualizar estado y prioridad           |
-| POST   | `/api/tickets/:id/responder`  | técnico/admin | Agregar respuesta al historial          |
-| POST   | `/api/tickets/:id/cerrar`     | usuarioNormal (dueño) | Confirmar solución y cerrar       |
-| POST   | `/api/tickets/:id/reabrir`    | usuarioNormal (dueño) | Reabrir con `{motivo}`             |
-
-### Administración
-
-| Método | Ruta                              | Rol          | Descripción                      |
-| ------ | --------------------------------- | ------------ | -------------------------------- |
-| GET    | `/api/admin/tickets`              | Administrador | Todos los tickets con `usuario`, `tecnico`, `departamento`, `tema` |
-| GET    | `/api/admin/tickets/:id`          | Administrador | Detalle de un ticket            |
-| GET    | `/api/admin/tickets/:id/historial`| Administrador | Historial de un ticket          |
-
-### Usuarios (personal)
-
-| Método | Ruta               | Rol          | Descripción                      |
-| ------ | ------------------ | ------------ | -------------------------------- |
-| GET    | `/api/usuarios`    | Administrador | Listar usuarios (sin administradores) |
-| POST   | `/api/usuarios`    | Administrador | Crear usuario (`{username, password, nombre, tipo, departamento_id}`) |
-| PUT    | `/api/usuarios/:id`| Administrador | Actualizar usuario              |
-| DELETE | `/api/usuarios/:id`| Administrador | Eliminar usuario                |
-
-### Problemas recurrentes
-
-| Método | Ruta                          | Rol    | Descripción                              |
-| ------ | ----------------------------- | ------ | ---------------------------------------- |
-| POST   | `/api/problemas`              | tecnico | Crear problema y vincular tickets `{titulo, descripcion, ticketsRelacionados}` |
-| GET    | `/api/problemas`              | tecnico | Listar problemas                        |
-| GET    | `/api/problemas/:id`          | tecnico | Detalle del problema con sus tickets    |
-| POST   | `/api/problemas/:id/resolver` | tecnico | Resolver problema `{solucion}`; cierra sus tickets en bloque |
-
-## Guardas de rutas (frontend)
-
-| Ruta                     | Rol requerido  |
-| ------------------------ | -------------- |
-| `/crear-ticket`          | `usuarioNormal` |
-| `/detalle-ticket-cliente/:id` | `usuarioNormal` |
-| `/tickets-asignados`     | `tecnico`       |
-| `/detalles-ticket/:id`   | `tecnico`       |
-| `/problemas`             | `tecnico`       |
-| `/ver-tickets`           | `administrador` |
-| `/personal`              | `administrador` |
-| `/configuraciones`       | `administrador` |
+<div align="center">
+  <sub>Desarrollado y mantenido con dedicación por <b>Edgar León Archuleta</b>.</sub><br/>
+  <sub>© 2026 OpenTicket. Todos los derechos reservados.</sub>
+</div>

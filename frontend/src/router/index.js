@@ -4,63 +4,59 @@ import { isAuthenticated, getUser, homeRouteFor } from '@/services/auth';
 const routes = [
   {
     path: '/',
+    redirect: () => (isAuthenticated() ? '/dashboard' : '/login'),
+  },
+  {
+    path: '/login',
     name: 'Login',
     component: () => import('@/views/Login.vue'),
-    meta: { showNavbar: false, public: true },
+    meta: { public: true, showNavbar: false },
   },
   {
-    path: '/crear-ticket',
-    name: 'CrearTicket',
-    component: () => import('@/views/CrearTicket.vue'),
-    meta: { showNavbar: true, roles: ['usuarioNormal'] },
+    path: '/dashboard',
+    name: 'Dashboard',
+    component: () => import('@/views/Dashboard.vue'),
+    meta: { roles: ['admin', 'agent', 'requester'] },
   },
   {
-    path: '/ver-tickets',
-    name: 'VerTickets',
-    component: () => import('@/views/VerTickets.vue'),
-    meta: { showNavbar: true, roles: ['administrador'] },
+    path: '/tickets',
+    name: 'Tickets',
+    component: () => import('@/views/Tickets.vue'),
+    meta: { roles: ['admin', 'agent', 'requester'] },
+  },
+  {
+    path: '/tickets/:id',
+    name: 'DetalleTicket',
+    component: () => import('@/views/DetalleTicket.vue'),
+    meta: { roles: ['admin', 'agent', 'requester'] },
+  },
+  {
+    path: '/departamentos',
+    name: 'Departamentos',
+    component: () => import('@/views/Departamentos.vue'),
+    meta: { roles: ['admin'] },
+  },
+  {
+    path: '/catalogos',
+    name: 'Catalogos',
+    component: () => import('@/views/Catalogos.vue'),
+    meta: { roles: ['admin'] },
+  },
+  {
+    path: '/usuarios',
+    name: 'Usuarios',
+    component: () => import('@/views/Usuarios.vue'),
+    meta: { roles: ['admin'] },
   },
   {
     path: '/perfil',
     name: 'Perfil',
     component: () => import('@/views/Perfil.vue'),
-    meta: { showNavbar: true },
+    meta: { roles: ['admin', 'agent', 'requester'] },
   },
   {
-    path: '/detalles-ticket/:id',
-    name: 'DetallesTicket',
-    component: () => import('@/views/DetalleTicket.vue'),
-    meta: { showNavbar: true, roles: ['tecnico'] },
-  },
-  {
-    path: '/tickets-asignados',
-    name: 'TicketsAsignados',
-    component: () => import('@/views/TicketsAsignados.vue'),
-    meta: { showNavbar: true, roles: ['tecnico'] },
-  },
-  {
-    path: '/configuraciones',
-    name: 'Configuraciones',
-    component: () => import('@/views/AreaConfiguraciones.vue'),
-    meta: { showNavbar: true, roles: ['administrador'] },
-  },
-  {
-    path: '/detalle-ticket-cliente/:id',
-    name: 'DetalleTicketCliente',
-    component: () => import('@/views/DetalleTicketCliente.vue'),
-    meta: { showNavbar: true, roles: ['usuarioNormal'] },
-  },
-  {
-    path: '/personal',
-    name: 'Personal',
-    component: () => import('@/views/Personal.vue'),
-    meta: { showNavbar: true, roles: ['administrador'] },
-  },
-  {
-    path: '/problemas',
-    name: 'Problemas',
-    component: () => import('@/views/GestionDeProblemas.vue'),
-    meta: { showNavbar: true, roles: ['tecnico'] },
+    path: '/:pathMatch(.*)*',
+    redirect: '/dashboard',
   },
 ];
 
@@ -77,11 +73,12 @@ router.beforeEach((to) => {
   }
 
   if (!authed) {
-    return { path: '/' };
+    return { path: '/login' };
   }
 
-  if (to.meta.roles && !to.meta.roles.includes(getUser()?.tipo)) {
-    return { path: homeRouteFor() };
+  const user = getUser();
+  if (to.meta.roles && !to.meta.roles.includes(user?.role)) {
+    return { path: '/dashboard' };
   }
 
   return true;

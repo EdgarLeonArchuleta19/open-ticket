@@ -1,32 +1,40 @@
-const TOKEN_KEY = 'token';
-const USER_KEY = 'usuario';
+const TOKEN_KEY = 'openticket_token';
+const USER_KEY = 'openticket_user';
 
 export function getToken() {
-  return localStorage.getItem(TOKEN_KEY);
+  return localStorage.getItem(TOKEN_KEY) || localStorage.getItem('quickticket_token');
 }
 
 export function getUser() {
   try {
-    return JSON.parse(localStorage.getItem(USER_KEY));
+    const raw = localStorage.getItem(USER_KEY) || localStorage.getItem('quickticket_user');
+    return raw ? JSON.parse(raw) : null;
   } catch (error) {
     return null;
   }
 }
 
-export function setSession(token, usuario) {
+export function setSession(token, user) {
   localStorage.setItem(TOKEN_KEY, token);
-  localStorage.setItem(USER_KEY, JSON.stringify(usuario));
+  localStorage.setItem(USER_KEY, JSON.stringify(user));
 }
 
 export function clearSession() {
   localStorage.removeItem(TOKEN_KEY);
   localStorage.removeItem(USER_KEY);
+  localStorage.removeItem('quickticket_token');
+  localStorage.removeItem('quickticket_user');
+}
+
+export function logout() {
+  clearSession();
+  window.location.href = '/login';
 }
 
 export function updateStoredUser(partial) {
-  const usuario = getUser();
-  if (!usuario) return;
-  localStorage.setItem(USER_KEY, JSON.stringify({ ...usuario, ...partial }));
+  const user = getUser();
+  if (!user) return;
+  localStorage.setItem(USER_KEY, JSON.stringify({ ...user, ...partial }));
 }
 
 export function isAuthenticated() {
@@ -34,17 +42,11 @@ export function isAuthenticated() {
 }
 
 export function hasRole(...roles) {
-  const usuario = getUser();
-  return Boolean(usuario && roles.includes(usuario.tipo));
+  const user = getUser();
+  return Boolean(user && roles.includes(user.role));
 }
 
-const DEPARTAMENTO_PROBLEMAS = 4;
-
-export function homeRouteFor(usuario = getUser()) {
-  if (!usuario) return '/';
-  if (usuario.tipo === 'administrador') return '/ver-tickets';
-  if (usuario.tipo === 'tecnico') {
-    return usuario.departamento_id === DEPARTAMENTO_PROBLEMAS ? '/problemas' : '/tickets-asignados';
-  }
-  return '/crear-ticket';
+export function homeRouteFor(user = getUser()) {
+  if (!user) return '/login';
+  return '/dashboard';
 }

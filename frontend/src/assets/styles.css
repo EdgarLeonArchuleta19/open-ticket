@@ -1,0 +1,161 @@
+/* ============================================================
+   OpenTicket - Minimalist Clean Flat Stylesheet
+   Mayormente blanco / Modo oscuro (negro) y detalles verde elegante
+   ============================================================ */
+
+html.dark {
+  color-scheme: dark;
+}
+
+/* Reset de scrollbars finos y sutiles */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+.dark ::-webkit-scrollbar-thumb {
+  background: #3f3f46;
+}
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: #52525b;
+}
+
+/* Transiciones limpias */
+button, a, input, select, textarea {
+  transition: all 0.15s ease-in-out;
+}
+
+/* Badges de estado discretos y profesionales */
+.badge-nuevo {
+  background-color: #f4f4f5;
+  color: #3f3f46;
+  border: 1px solid #e4e4e7;
+}
+.dark .badge-nuevo {
+  background-color: #27272a;
+  color: #d4d4d8;
+  border-color: #3f3f46;
+}
+
+.badge-abierto {
+  background-color: #ecfdf5;
+  color: #065f46;
+  border: 1px solid #a7f3d0;
+}
+.dark .badge-abierto {
+  background-color: rgba(6, 95, 70, 0.25);
+  color: #6ee7b7;
+  border-color: rgba(16, 185, 129, 0.4);
+}
+
+.badge-en_proceso {
+  background-color: #fefce8;
+  color: #854d0e;
+  border: 1px solid #fef08a;
+}
+.dark .badge-en_proceso {
+  background-color: rgba(133, 77, 14, 0.25);
+  color: #fef08a;
+  border-color: rgba(234, 179, 8, 0.4);
+}
+
+.badge-en_espera {
+  background-color: #faf5ff;
+  color: #6b21a8;
+  border: 1px solid #e9d5ff;
+}
+.dark .badge-en_espera {
+  background-color: rgba(107, 33, 168, 0.25);
+  color: #d8b4fe;
+  border-color: rgba(168, 85, 247, 0.4);
+}
+
+.badge-resuelto {
+  background-color: #f0fdf4;
+  color: #166534;
+  border: 1px solid #bbf7d0;
+}
+.dark .badge-resuelto {
+  background-color: rgba(22, 101, 52, 0.25);
+  color: #86efac;
+  border-color: rgba(34, 197, 94, 0.4);
+}
+
+.badge-cerrado {
+  background-color: #fafafa;
+  color: #71717a;
+  border: 1px solid #e4e4e7;
+}
+.dark .badge-cerrado {
+  background-color: #18181b;
+  color: #a1a1aa;
+  border-color: #27272a;
+}
+
+.badge-cancelado {
+  background-color: #fef2f2;
+  color: #991b1b;
+  border: 1px solid #fecaca;
+}
+.dark .badge-cancelado {
+  background-color: rgba(153, 27, 27, 0.25);
+  color: #fca5a5;
+  border-color: rgba(239, 68, 68, 0.4);
+}
+
+/* Prioridades */
+.priority-baja {
+  background-color: #f4f4f5;
+  color: #52525b;
+  border: 1px solid #e4e4e7;
+}
+.dark .priority-baja {
+  background-color: #27272a;
+  color: #a1a1aa;
+  border-color: #3f3f46;
+}
+
+.priority-media {
+  background-color: #ecfdf5;
+  color: #047857;
+  border: 1px solid #a7f3d0;
+}
+.dark .priority-media {
+  background-color: rgba(6, 78, 59, 0.3);
+  color: #6ee7b7;
+  border-color: rgba(16, 185, 129, 0.35);
+}
+
+.priority-alta {
+  background-color: #fff7ed;
+  color: #9a3412;
+  border: 1px solid #fed7aa;
+}
+.dark .priority-alta {
+  background-color: rgba(154, 52, 18, 0.25);
+  color: #fdba74;
+  border-color: rgba(249, 115, 22, 0.35);
+}
+
+.priority-critica {
+  background-color: #fef2f2;
+  color: #991b1b;
+  border: 1px solid #fecaca;
+  font-weight: 700;
+}
+.dark .priority-critica {
+  background-color: rgba(153, 27, 27, 0.25);
+  color: #fca5a5;
+  border-color: rgba(239, 68, 68, 0.4);
+  font-weight: 700;
+}

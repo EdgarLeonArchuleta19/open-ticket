@@ -1,7 +1,8 @@
 {
-  "name": "telmex",
-  "version": "0.1.0",
+  "name": "open-ticket",
+  "version": "1.0.0",
   "private": true,
+  "description": "Frontend de Open-Ticket - Sistema Open Source de Gestión de Tickets",
   "scripts": {
     "serve": "vue-cli-service serve",
     "build": "vue-cli-service build"

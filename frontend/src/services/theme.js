@@ -1,0 +1,27 @@
+import { ref } from 'vue';
+
+const THEME_KEY = 'openticket_theme';
+
+export const isDark = ref(false);
+
+export function initTheme() {
+  const saved = localStorage.getItem(THEME_KEY);
+  if (saved === 'dark') {
+    isDark.value = true;
+    document.documentElement.classList.add('dark');
+  } else {
+    isDark.value = false;
+    document.documentElement.classList.remove('dark');
+  }
+}
+
+export function toggleTheme() {
+  isDark.value = !isDark.value;
+  if (isDark.value) {
+    document.documentElement.classList.add('dark');
+    localStorage.setItem(THEME_KEY, 'dark');
+  } else {
+    document.documentElement.classList.remove('dark');
+    localStorage.setItem(THEME_KEY, 'light');
+  }
+}

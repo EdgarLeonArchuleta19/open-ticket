@@ -1,0 +1,58 @@
+version: '3.8'
+
+services:
+  database:
+    image: postgres:16-alpine
+    container_name: open_ticket_db
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: secretpassword
+      POSTGRES_DB: open_ticket
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./database/schema.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d open_ticket"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: open_ticket_backend
+    environment:
+      PORT: 3000
+      NODE_ENV: production
+      DB_HOST: database
+      DB_PORT: 5432
+      DB_USER: postgres
+      DB_PASSWORD: secretpassword
+      DB_NAME: open_ticket
+      JWT_SECRET: super_secure_open_ticket_jwt_key_2026
+      JWT_EXPIRES: 8h
+      CORS_ORIGIN: http://localhost:8080,http://localhost:80
+    ports:
+      - "3000:3000"
+    depends_on:
+      database:
+        condition: service_healthy
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: open_ticket_frontend
+    ports:
+      - "8080:80"
+    depends_on:
+      - backend
+    restart: unless-stopped
+
+volumes:
+  postgres_data:

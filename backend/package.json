@@ -1,16 +1,24 @@
 {
-  "name": "telmex-backend",
+  "name": "open-ticket-backend",
   "version": "1.0.0",
-  "description": "API REST del Sistema Gestor de Reportes - Telmex",
+  "description": "API REST de OpenTicket - Sistema Empresarial de Gestión de Tickets",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
     "dev": "node --watch server.js",
-    "seed": "node scripts/seed-users.js"
+    "seed": "node scripts/seed.js"
   },
-  "keywords": ["telmex", "tickets", "express", "postgresql"],
-  "author": "",
-  "license": "ISC",
+  "keywords": [
+    "quickticket",
+    "tickets",
+    "helpdesk",
+    "support",
+    "express",
+    "postgresql",
+    "open-source"
+  ],
+  "author": "QuickTicket Team",
+  "license": "MIT",
   "dependencies": {
     "bcryptjs": "^2.4.3",
     "cors": "^2.8.5",
